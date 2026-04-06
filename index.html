@@ -85,7 +85,7 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* --- စာသား Gradient Flow Effect --- */
+        /* --- စာကြောင်းအားလုံးအတွက် Gradient Effect --- */
         @keyframes gradientMove {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -93,24 +93,20 @@
         }
 
         .description {
-            color: #000;
             font-size: 14px;
             line-height: 1.8;
             margin-bottom: 25px;
             padding: 0 10px;
             font-weight: 600;
-        }
-
-        .description b {
-            /* စာသားကို အရောင်ပြေးဖြစ်အောင် လုပ်ခြင်း */
+            
+            /* စာကြောင်းအားလုံးကို အရောင်ပြေးအကျိုးသက်ရောက်မှုပေးခြင်း */
             background: linear-gradient(90deg, #000, #555, #000);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: gradientMove 3s linear infinite;
-            display: inline-block;
         }
-        /* ---------------------------------- */
+        /* ------------------------------------------- */
 
         .contact-grid {
             display: grid;
@@ -194,10 +190,10 @@
             </div>
             
             <p class="description">
-                <b>ချစ်ခင်ရပါသော Customer များခင်ဗျာ၊</b><br>
+                ချစ်ခင်ရပါသော Customer များခင်ဗျာ၊<br>
                 လူကြီးမင်းတို့ ပေးပို့လိုသည့် ပုံများ၊ ဖိုင်များကို<br>
                 အောက်ဖော်ပြပါ Card များမှတစ်ဆင့်<br>
-                <b>ပေးပို့နိုင်ပါတယ်ခင်ဗျာ။</b>
+                ပေးပို့နိုင်ပါတယ်ခင်ဗျာ။
             </p>
         </div>
 

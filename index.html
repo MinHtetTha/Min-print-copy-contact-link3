@@ -85,7 +85,6 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* --- စာသား Effect အသစ် --- */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -97,6 +96,13 @@
             }
         }
 
+        /* --- စာသား ဖျက်လက်ဖျက်လက် ဖြစ်စေမည့် Animation --- */
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+
         .description {
             color: #000;
             font-size: 14px;
@@ -104,15 +110,17 @@
             margin-bottom: 25px;
             padding: 0 10px;
             font-weight: 600;
-            /* Fade in effect ကို ဤနေရာတွင် ထည့်ထားသည် */
             animation: fadeInUp 1.2s ease-out forwards;
         }
 
+        /* ထူးခြားစေချင်သော စာသားကို အနက်ရောင်ပြောင်းပြီး မှိတ်တုတ်လုပ်ခြင်း */
         .description b {
-            color: #fff;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            color: #000000; /* စာလုံးအနက် */
+            text-shadow: none; /* အရင် Glow effect ဖြုတ်သည် */
+            /* ဖျက်လက်ဖျက်လက် effect ကို ဤနေရာတွင် ထည့်သည် */
+            animation: blinker 1.5s linear infinite;
         }
-        /* ----------------------- */
+        /* ----------------------------------------------- */
 
         .contact-grid {
             display: grid;

@@ -3,7 +3,7 @@
   "short_name": "Min",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#e67e22",
+  "background_color": "#ffffff",
   "theme_color": "#e67e22",
   "icons": [
     {

@@ -49,7 +49,7 @@
             width: 180px;
             height: 180px;
             background-color: #ffffff;
-            border-radius: 25px; /* ထောင့်ဝိုက်ပေးထားသော ပမာဏ */
+            border-radius: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -78,6 +78,31 @@
             margin-top: 6px;
             font-size: 14px;
             opacity: 0.9;
+        }
+
+        /* Music Control Floating Button (သီချင်း ဖွင့်/ပိတ် ခလုတ်လေး) */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffffff;
+            color: #e67e22;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .music-control:hover {
+            transform: scale(1.05);
         }
 
         /* ----------------------------------
@@ -206,7 +231,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
-        /* SVG Styling */
         .icon {
             width: 32px;
             height: 32px;
@@ -219,7 +243,6 @@
             height: 28px;
         }
 
-        /* Brand Colors */
         .icon-telegram { fill: #0088cc; }
         .icon-viber { fill: #7360f2; }
         .icon-messenger { fill: #006aff; }
@@ -256,6 +279,16 @@
     </style>
 </head>
 <body>
+
+    <!-- နောက်ခံသီချင်းဖိုင် (သင့်ရဲ့ သီချင်းဖိုင်အမည်ကို src မှာ ထည့်ပါ) -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="your-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- အောက်ခြေတွင် သီချင်းဖွင့်/ပိတ် ထိန်းချုပ်ရန် ခလုတ် -->
+    <button id="music-btn" class="music-control" onclick="toggleMusic()">
+        🎵 <span id="music-text">Music Play</span>
+    </button>
 
     <!-- စစဖွင့်ချင်း ပေါ်လာမယ့် Logo + စာသား စာမျက်နှာ -->
     <div id="splash-screen">
@@ -356,14 +389,55 @@
         </div>
     </div>
 
-    <!-- ၃ စက္ကန့်အကြာတွင် Logo Screen ကို ပျောက်သွားစေရန် နှိုးဆော်ပေးသော Script -->
+    <!-- Script: သီချင်းဖွင့်ခြင်း၊ ထိန်းချုပ်ခြင်းနှင့် Screen ဖျောက်ရန် -->
     <script>
+        const music = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-btn');
+        const musicText = document.getElementById('music-text');
+
+        // သီချင်း ဖွင့်/ပိတ် ပြုလုပ်ရန် Function
+        function toggleMusic() {
+            if (music.paused) {
+                music.play().then(() => {
+                    musicText.innerText = "Music Pause";
+                    musicBtn.style.background = "#e67e22";
+                    musicBtn.style.color = "#ffffff";
+                }).catch(e => {
+                    console.log("Play blocked");
+                });
+            } else {
+                music.pause();
+                musicText.innerText = "Music Play";
+                musicBtn.style.background = "#ffffff";
+                musicBtn.style.color = "#e67e22";
+            }
+        }
+
+        // App စဖွင့်ချိန် လုပ်ဆောင်ချက်များ
         window.addEventListener('load', () => {
+            // အလိုအလျောက် သီချင်းစတင်ရန် ကြိုးစားခြင်း
+            music.play().then(() => {
+                musicText.innerText = "Music Pause";
+                musicBtn.style.background = "#e67e22";
+                musicBtn.style.color = "#ffffff";
+            }).catch(error => {
+                // ဘရောင်ဇာက ပိတ်ပင်ထားပါက မျက်နှာပြင်ပေါ်သို့ တစ်ချက်တို့ထိလိုက်သည်နှင့် ဖွင့်ပေးရန်
+                document.body.addEventListener('click', () => {
+                    if (music.paused) {
+                        music.play();
+                        musicText.innerText = "Music Pause";
+                        musicBtn.style.background = "#e67e22";
+                        musicBtn.style.color = "#ffffff";
+                    }
+                }, { once: true });
+            });
+
+            // ၃ စက္ကန့်အကြာတွင် Logo Screen ကို ပျောက်သွားစေရန်
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 splash.style.opacity = '0';
                 splash.style.visibility = 'hidden';
-            }, 2500); // ၂.၅ စက္ကန့် ကြာပါမည် (အချိန်ပြောင်းချင်ပါက 2500 ကို ပြင်နိုင်ပါသည်)
+            }, 2500); 
         });
     </script>
 

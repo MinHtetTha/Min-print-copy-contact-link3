@@ -224,24 +224,6 @@
             text-overflow: ellipsis;
         }
 
-        .strip-actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .chip-btn {
-            background: #ffffff;
-            color: var(--ink);
-            border: none;
-            border-radius: 999px;
-            padding: 6px 11px;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
-        }
-
         .install-btn {
             display: none;
             background: #0f172a;
@@ -252,6 +234,7 @@
             font-size: 11px;
             font-weight: 800;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .install-btn.show {
@@ -318,6 +301,10 @@
             font-size: 11.5px;
             font-weight: 700;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             transition: background 0.2s ease, transform 0.2s ease;
         }
 
@@ -362,10 +349,6 @@
         }
 
         .section-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
             font-size: 12.5px;
             font-weight: 800;
             margin-bottom: 10px;
@@ -401,34 +384,6 @@
         .service-desc {
             font-size: 11px;
             opacity: 0.85;
-        }
-
-        .steps-list {
-            list-style: none;
-            font-size: 12.5px;
-            line-height: 1.8;
-        }
-
-        .template-box {
-            margin-top: 10px;
-            background: rgba(15, 23, 42, 0.34);
-            border: 1px dashed rgba(255, 255, 255, 0.35);
-            border-radius: 12px;
-            padding: 10px 12px;
-            font-size: 11.5px;
-            line-height: 1.65;
-            color: #f8fafc;
-        }
-
-        .mini-copy-btn {
-            background: #ffffff;
-            color: var(--ink);
-            border: none;
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 10.5px;
-            font-weight: 800;
-            cursor: pointer;
         }
 
         /* Contact Cards */
@@ -528,7 +483,7 @@
             border-radius: 18px;
             padding: 16px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .info-title {
@@ -545,22 +500,43 @@
             font-weight: 600;
         }
 
-        .payment-row {
+        .payment-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 14px;
         }
 
-        .pay-badge {
+        .pay-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             background: #f8fafc;
             border: 1px solid var(--line);
             color: var(--ink);
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 700;
-            padding: 5px 10px;
-            border-radius: 8px;
+            padding: 6px 10px;
+            border-radius: 10px;
         }
+
+        .pay-badge-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 900;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .kbz-bg { background: #0055a5; }
+        .wave-bg { background: #eab308; color: #0f172a; }
+        .aya-bg { background: #dc2626; }
+        .cash-bg { background: #16a34a; }
 
         .action-row {
             display: flex;
@@ -574,8 +550,48 @@
             text-decoration: none;
             font-size: 11.5px;
             font-weight: 700;
-            padding: 7px 13px;
+            padding: 8px 14px;
             border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* FAQ Accordion */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .faq-item summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-answer {
+            padding: 0 12px 11px;
+            font-size: 11.5px;
+            line-height: 1.7;
+            opacity: 0.92;
         }
 
         /* Theme Switcher */
@@ -718,16 +734,13 @@
     <div class="main-wrapper">
         <div class="container">
 
-            <!-- Top Status & Actions -->
+            <!-- Top Status & Install -->
             <div class="top-strip">
                 <div class="status-group">
                     <span id="status-dot" class="status-dot"></span>
                     <span id="status-label" class="status-text">Open Now · 8:00 AM – 8:00 PM</span>
                 </div>
-                <div class="strip-actions">
-                    <button class="chip-btn" onclick="shareCard()">Share</button>
-                    <button id="install-btn" class="install-btn" onclick="installApp()">Install App</button>
-                </div>
+                <button id="install-btn" class="install-btn" onclick="installApp()">Install App</button>
             </div>
 
             <!-- Brand Identity -->
@@ -739,11 +752,11 @@
                 <div class="brand-tagline">Photo · Document · Copy · Finishing</div>
             </div>
 
-            <!-- Quick Utility Buttons -->
+            <!-- Quick Utility Row (Share moved here in place of Copy GPS) -->
             <div class="utility-row">
                 <button class="utility-btn" onclick="downloadVCard()">Save Contact</button>
                 <button class="utility-btn" onclick="openQRModal()">QR Code</button>
-                <button class="utility-btn" onclick="copyText('16.854132287069156, 96.12929656028936', 'GPS Coordinates Copy ကူးပြီးပါပြီ')">Copy GPS</button>
+                <button class="utility-btn" onclick="shareCard()">Share</button>
             </div>
 
             <!-- Marquee -->
@@ -765,9 +778,7 @@
 
             <!-- Services -->
             <div class="glass-section">
-                <div class="section-head">
-                    <span>Services Offered</span>
-                </div>
+                <div class="section-head">Services Offered</div>
                 <div class="services-grid">
                     <div class="service-item">
                         <div class="service-title">Photo Printing</div>
@@ -785,26 +796,6 @@
                         <div class="service-title">Binding &amp; Filing</div>
                         <div class="service-desc">Reports · Notes · Files</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- How to Send + Quick Order Template -->
-            <div class="glass-section">
-                <div class="section-head">
-                    <span>How to Send Files</span>
-                    <button class="mini-copy-btn" onclick="copyOrderTemplate()">Copy Format</button>
-                </div>
-                <ul class="steps-list">
-                    <li>1. ပုံကြည်လင်မှု မကျစေရန် <b>Document / Original File</b> အဖြစ် ပို့ပါ။</li>
-                    <li>2. <b>Size</b>၊ <b>Color / B&amp;W</b> နှင့် <b>Copies</b> အရေအတွက် ထည့်ရေးပါ။</li>
-                    <li>3. အမြန်လိုအပ်ပါက <b>Telegram</b> သို့မဟုတ် <b>Phone</b> ဖြင့် ဆက်သွယ်ပါ။</li>
-                </ul>
-                <div class="template-box" id="order-template">
-                    Name: <br>
-                    Service: Photo / Print / Copy<br>
-                    Size: A4 / 4R / Passport<br>
-                    Color / B&amp;W: <br>
-                    Copies:
                 </div>
             </div>
 
@@ -858,23 +849,62 @@
                 </div>
             </div>
 
-            <!-- Location & Payment Card -->
+            <!-- Location & Payment Card (Open Google Maps kept here) -->
             <div class="info-card">
                 <div class="info-title">Location &amp; Payment</div>
                 <div class="info-line">
                     မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်<br>
                     Hours: Daily 8:00 AM – 8:00 PM
                 </div>
-                <div class="payment-row">
-                    <span class="pay-badge">KBZPay</span>
-                    <span class="pay-badge">WavePay</span>
-                    <span class="pay-badge">AYA Pay</span>
-                    <span class="pay-badge">Cash</span>
+
+                <div class="payment-grid">
+                    <span class="pay-chip">
+                        <span class="pay-badge-icon kbz-bg">KBZ</span>
+                        <span>KBZPay</span>
+                    </span>
+                    <span class="pay-chip">
+                        <span class="pay-badge-icon wave-bg">W</span>
+                        <span>WavePay</span>
+                    </span>
+                    <span class="pay-chip">
+                        <span class="pay-badge-icon aya-bg">AYA</span>
+                        <span>AYA Pay</span>
+                    </span>
+                    <span class="pay-chip">
+                        <span class="pay-badge-icon cash-bg">MMK</span>
+                        <span>Cash</span>
+                    </span>
                 </div>
+
                 <div class="action-row">
                     <a class="map-btn" href="https://www.google.com/maps?q=16.854132287069156,96.12929656028936" target="_blank" rel="noopener noreferrer">Open Google Maps</a>
-                    <button class="copy-btn" onclick="copyText('မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်', 'လိပ်စာ Copy ကူးပြီးပါပြီ')">Copy Address</button>
-                    <button class="copy-btn" onclick="copyText('paannpyoelaat428@gmail.com', 'Email Copy ကူးပြီးပါပြီ')">Copy Email</button>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="glass-section">
+                <div class="section-head">FAQ · မေးလေ့ရှိသော မေးခွန်းများ</div>
+                <div class="faq-list">
+                    <details class="faq-item">
+                        <summary>ဖိုင်တွေကို ဘယ်ကနေ ပို့လို့ရလဲ။ <span>+</span></summary>
+                        <div class="faq-answer">
+                            Telegram (@minhtetthar428)၊ Viber၊ Messenger၊ Instagram၊ TikTok သို့မဟုတ် Email (paannpyoelaat428@gmail.com) တို့မှ ပေးပို့နိုင်ပါသည်။
+                        </div>
+                    </details>
+
+                    <details class="faq-item">
+                        <summary>ဆိုင်ဖွင့်ချိန်က ဘယ်အချိန်ကနေ ဘယ်အချိန်အထိလဲ။ <span>+</span></summary>
+                        <div class="faq-answer">
+                            နေ့စဉ် မနက် 8:00 AM မှ ည 8:00 PM အထိ ဖွင့်လှစ်ပါသည်။
+                        </div>
+                    </details>
+
+                    <details class="faq-item">
+                        <summary>Viber / Messenger / Instagram ဖွင့်မရရင် ဘာလုပ်ရမလဲ။ <span>+</span></summary>
+                        <div class="faq-answer">
+                            အဆိုပါ Link များအတွက် VPN လိုအပ်နိုင်ပါသည်။ VPN မသုံးလိုပါက Telegram (@minhtetthar428) သို့မဟုတ် Phone (09 964 563 388) ဖြင့် တိုက်ရိုက် ဆက်သွယ်နိုင်ပါသည်။
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -936,17 +966,6 @@
             document.execCommand('copy');
             document.body.removeChild(ta);
             showToast(label);
-        }
-
-        function copyOrderTemplate() {
-            const tpl = [
-                'Name: ',
-                'Service: Photo / Print / Copy',
-                'Size: A4 / 4R / Passport',
-                'Color / B&W: ',
-                'Copies: '
-            ].join('\n');
-            copyText(tpl, 'Order Format Copy ကူးပြီးပါပြီ');
         }
 
         /* Live Open/Closed Status (8:00 AM - 8:00 PM) */

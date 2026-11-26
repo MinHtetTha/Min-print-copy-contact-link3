@@ -85,7 +85,7 @@
             font-weight: 700;
             opacity: 0;
             pointer-events: none;
-            z-index: 10002;
+            z-index: 10006;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
             transition: opacity 0.22s ease, transform 0.22s ease;
         }
@@ -140,6 +140,94 @@
             font-size: 13px;
             opacity: 0.88;
             font-weight: 500;
+        }
+
+        /* Story / Full-Screen Ad Modal */
+        .story-ad-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(8px);
+            z-index: 10005;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .story-ad-backdrop.open {
+            display: flex;
+        }
+
+        .story-ad-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 86vh;
+            max-height: 760px;
+            border-radius: 22px;
+            overflow: hidden;
+            background: #1e293b;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-ad-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .story-skip-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 2;
+            background: rgba(15, 23, 42, 0.75);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .story-skip-btn:not(:disabled) {
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        .story-dots {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 7px;
+            z-index: 2;
+        }
+
+        .story-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .story-dot.active {
+            background: #ffffff;
+            transform: scale(1.2);
         }
 
         /* Floating Music Button */
@@ -710,6 +798,19 @@
     <div id="toast" class="toast">Copied</div>
     <canvas id="fx-canvas"></canvas>
 
+    <!-- Story / Full-Screen Ad Modal (3 Posters) -->
+    <div id="story-ad-modal" class="story-ad-backdrop">
+        <div class="story-ad-box">
+            <button id="story-skip-btn" class="story-skip-btn" onclick="closeStoryAd()" disabled>
+                ကျော်မည် <span id="story-timer">3s</span>
+            </button>
+
+            <img id="story-ad-img" src="poster1.jpg" alt="Min Print & Copy Poster" class="story-ad-img" onclick="nextStorySlide()">
+
+            <div class="story-dots" id="story-dots"></div>
+        </div>
+    </div>
+
     <!-- Background Music -->
     <audio id="bg-music" loop preload="auto">
         <source src="hard_copy_rush.mp3" type="audio/mpeg">
@@ -849,7 +950,7 @@
                 </div>
             </div>
 
-            <!-- Location & Payment Card (Open Google Maps kept here) -->
+            <!-- Location & Payment Card -->
             <div class="info-card">
                 <div class="info-title">Location &amp; Payment</div>
                 <div class="info-line">
@@ -966,6 +1067,76 @@
             document.execCommand('copy');
             document.body.removeChild(ta);
             showToast(label);
+        }
+
+        /* Story / Full-Screen Ad (3 Portrait Posters) */
+        const STORY_IMAGES = [
+            'poster1.jpg',
+            'poster2.jpg',
+            'poster3.jpg'
+        ];
+
+        let storyIndex = 0;
+        let skipInterval;
+
+        function renderStoryDots() {
+            const dotsWrap = document.getElementById('story-dots');
+            dotsWrap.innerHTML = '';
+            if (STORY_IMAGES.length <= 1) return;
+
+            STORY_IMAGES.forEach((_, idx) => {
+                const dot = document.createElement('button');
+                dot.className = 'story-dot' + (idx === storyIndex ? ' active' : '');
+                dot.setAttribute('aria-label', `Poster ${idx + 1}`);
+                dot.onclick = (e) => {
+                    e.stopPropagation();
+                    showStorySlide(idx);
+                };
+                dotsWrap.appendChild(dot);
+            });
+        }
+
+        function showStorySlide(idx) {
+            storyIndex = (idx + STORY_IMAGES.length) % STORY_IMAGES.length;
+            document.getElementById('story-ad-img').src = STORY_IMAGES[storyIndex];
+            renderStoryDots();
+        }
+
+        function nextStorySlide() {
+            if (STORY_IMAGES.length > 1) {
+                showStorySlide(storyIndex + 1);
+            }
+        }
+
+        function openStoryAd() {
+            const modal = document.getElementById('story-ad-modal');
+            const skipBtn = document.getElementById('story-skip-btn');
+
+            storyIndex = 0;
+            showStorySlide(0);
+            modal.classList.add('open');
+
+            let left = 3;
+            skipBtn.disabled = true;
+            skipBtn.innerHTML = `ကျော်မည် <span id="story-timer">${left}s</span>`;
+
+            clearInterval(skipInterval);
+            skipInterval = setInterval(() => {
+                left -= 1;
+                if (left > 0) {
+                    const t = document.getElementById('story-timer');
+                    if (t) t.innerText = `${left}s`;
+                } else {
+                    clearInterval(skipInterval);
+                    skipBtn.disabled = false;
+                    skipBtn.innerHTML = 'ကျော်မည်';
+                }
+            }, 1000);
+        }
+
+        function closeStoryAd() {
+            clearInterval(skipInterval);
+            document.getElementById('story-ad-modal').classList.remove('open');
         }
 
         /* Live Open/Closed Status (8:00 AM - 8:00 PM) */
@@ -1214,6 +1385,7 @@
                 const splash = document.getElementById('splash-screen');
                 splash.style.opacity = '0';
                 splash.style.visibility = 'hidden';
+                openStoryAd();
             }, 2100);
         });
     </script>

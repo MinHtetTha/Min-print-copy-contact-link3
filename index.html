@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Min Print & Copy - Contact Cards</title>
 
-    <!-- PWA ထည့်သွင်းထားသော Code များ -->
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#e67e22">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Min Print & Copy">
     <link rel="apple-touch-icon" href="443.png">
 
     <style>
@@ -20,43 +21,81 @@
             font-family: 'Pyidaungsu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        body {
-            background-color: #e67e22;
-            min-height: 100vh;
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f39c12 0%, #e67e22 50%, #d35400 100%);
+            --accent-color: #e67e22;
+            --glass-bg: rgba(255, 255, 255, 0.18);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --card-bg: rgba(255, 255, 255, 0.94);
+            --text-dark: #1e293b;
         }
 
-        /* ----------------------------------
-           ၁။ စစဖွင့်ချင်း ပေါ်လာမယ့် Logo စာမျက်နှာ (Splash Screen)
-        ---------------------------------- */
-        #splash-screen {
+        /* Event Themes */
+        body.theme-christmas {
+            --bg-gradient: linear-gradient(135deg, #0f2027 0%, #1b4332 50%, #7f1d1d 100%);
+            --accent-color: #c1121f;
+        }
+
+        body.theme-newyear {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #1e1b4b 55%, #854d0e 100%);
+            --accent-color: #eab308;
+        }
+
+        body.theme-thingyan {
+            --bg-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #f59e0b 100%);
+            --accent-color: #0284c7;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            transition: background 0.6s ease;
+        }
+
+        /* Animated Background Canvas */
+        #fx-canvas {
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
-            background-color: #e67e22;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-gradient);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
             padding: 20px;
         }
 
-        /* Logo ထောင့်ဝိုက်စတိုင် */
         .splash-logo-box {
-            width: 180px;
-            height: 180px;
+            width: 170px;
+            height: 170px;
             background-color: #ffffff;
-            border-radius: 25px;
+            border-radius: 28px;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            margin-bottom: 25px;
-            overflow: hidden;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+            margin-bottom: 24px;
+            animation: floatLogo 2.2s ease-in-out infinite;
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
         }
 
         .splash-logo-box img {
@@ -67,52 +106,52 @@
 
         .splash-text {
             color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 17px;
+            font-weight: 700;
             text-align: center;
-            line-height: 1.6;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            line-height: 1.7;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .splash-sub-text {
             margin-top: 6px;
             font-size: 14px;
-            opacity: 0.9;
+            opacity: 0.92;
         }
 
-        /* Music Control Floating Button (သီချင်း ဖွင့်/ပိတ် ခလုတ်လေး) */
+        /* Floating Music Button */
         .music-control {
             position: fixed;
             bottom: 20px;
             right: 20px;
             background: #ffffff;
-            color: #e67e22;
+            color: var(--accent-color);
             border: none;
             border-radius: 50px;
-            padding: 10px 18px;
-            font-weight: bold;
+            padding: 11px 18px;
+            font-weight: 700;
             font-size: 13px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 10000;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+            z-index: 1000;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.3s ease;
+            transition: transform 0.25s ease, background 0.3s ease, color 0.3s ease;
         }
 
         .music-control:hover {
             transform: scale(1.05);
         }
 
-        /* ----------------------------------
-           ၂။ ပင်မစာမျက်နှာ (Contact Cards)
-        ---------------------------------- */
+        /* Main Wrapper */
         .main-wrapper {
+            position: relative;
+            z-index: 2;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 40px 20px;
+            padding: 32px 18px 90px;
         }
 
         .container {
@@ -121,21 +160,84 @@
             text-align: center;
         }
 
+        /* Top Event & Install Bar */
+        .top-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .event-pill {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .event-pill.active, .event-pill:hover {
+            background: #ffffff;
+            color: var(--text-dark);
+            transform: translateY(-1px);
+        }
+
+        .install-btn {
+            display: none;
+            background: #10b981;
+            color: #ffffff;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+
+        .install-btn.show {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Event Banner */
+        .event-banner {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Profile */
         .profile {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .profile-img {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 15px;
+            width: 106px;
+            height: 106px;
+            margin: 0 auto 14px;
             border-radius: 50%;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background-color: white;
+            border: 3px solid rgba(255, 255, 255, 0.75);
+            background-color: #ffffff;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
         }
 
         .profile-img img {
@@ -145,32 +247,33 @@
         }
 
         h1 {
-            color: #000;
+            color: #ffffff;
             font-size: 24px;
             font-weight: 800;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             text-transform: uppercase;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
         }
 
         .marquee-bar {
             width: 100%;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.15);
-            padding: 8px 0;
-            margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(8px);
+            padding: 9px 0;
+            margin-bottom: 20px;
             border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
         .marquee-content {
             display: inline-block;
             white-space: nowrap;
             padding-left: 100%;
-            animation: moveMarquee 20s linear infinite;
+            animation: moveMarquee 22s linear infinite;
             color: #fff;
-            font-weight: bold;
-            font-size: 14px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            font-weight: 700;
+            font-size: 13.5px;
         }
 
         @keyframes moveMarquee {
@@ -178,43 +281,40 @@
             100% { transform: translateX(-100%); }
         }
 
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         .description {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
             font-size: 14px;
-            line-height: 1.8;
-            margin-bottom: 25px;
-            padding: 0 10px;
+            line-height: 1.85;
+            margin-bottom: 22px;
+            padding: 14px 16px;
             font-weight: 600;
-            background: linear-gradient(90deg, #000, #555, #000);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientMove 3s linear infinite;
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
 
+        /* Contact Grid */
         .contact-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 14px;
         }
 
         .contact-card {
-            background: #ffffff;
-            border-radius: 15px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
             text-decoration: none;
-            color: #333;
+            color: var(--text-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
             aspect-ratio: 1 / 0.9;
         }
 
@@ -223,18 +323,18 @@
             aspect-ratio: auto;
             flex-direction: row;
             gap: 15px;
-            padding: 15px;
+            padding: 16px;
         }
 
         .contact-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
         }
 
         .icon {
             width: 32px;
             height: 32px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .call-card .icon {
@@ -249,76 +349,105 @@
         .icon-instagram { fill: #e1306c; }
         .icon-tiktok { fill: #000000; }
         .icon-email { fill: #ea4335; }
-        .icon-phone { fill: #34a853; }
+        .icon-phone { fill: #16a34a; }
 
         .card-title {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 15px;
         }
 
         .card-sub {
-            font-size: 10px;
-            color: #777;
-            margin-top: 4px;
-            font-weight: 500;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+            font-weight: 600;
+        }
+
+        .ios-tip {
+            margin-top: 16px;
+            font-size: 11.5px;
+            background: rgba(0, 0, 0, 0.22);
+            border-radius: 12px;
+            padding: 8px 12px;
+            color: #f8fafc;
         }
 
         .footer-note {
-            margin-top: 35px;
+            margin-top: 24px;
             font-size: 12px;
-            color: #000;
-            font-weight: bold;
+            color: #ffffff;
+            font-weight: 700;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
         }
 
         .address-text {
-            margin-bottom: 10px;
-            font-size: 11px;
-            opacity: 0.85;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 11.5px;
+            opacity: 0.95;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-    <!-- နောက်ခံသီချင်းဖိုင် (သင့်ရဲ့ သီချင်းဖိုင်အမည်ကို src မှာ ထည့်ပါ) -->
+    <!-- Event Animation Canvas -->
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- Background Music -->
     <audio id="bg-music" loop preload="auto">
         <source src="hard_copy_rush.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- အောက်ခြေတွင် သီချင်းဖွင့်/ပိတ် ထိန်းချုပ်ရန် ခလုတ် -->
+    <!-- Music Button -->
     <button id="music-btn" class="music-control" onclick="toggleMusic()">
         🎵 <span id="music-text">Music Play</span>
     </button>
 
-    <!-- စစဖွင့်ချင်း ပေါ်လာမယ့် Logo + စာသား စာမျက်နှာ -->
+    <!-- Splash Screen -->
     <div id="splash-screen">
         <div class="splash-logo-box">
             <img src="443.png" alt="Min Print & Copy Logo">
         </div>
         <div class="splash-text">
             Min Print & Copy မှ ကြိုဆိုပါတယ်ခင်ဗျာ
-            <div class="splash-sub-text">
+            <div class="splash-sub-text" id="splash-event-sub">
                 🧡သာယာသောနေ့လေးတစ်နေ့ဖြစ်ပါစေခင်ဗျာ🧡
             </div>
         </div>
     </div>
 
-    <!-- ပင်မစာမျက်နှာ (Contact Cards) -->
+    <!-- Main Page -->
     <div class="main-wrapper">
         <div class="container">
+
+            <!-- Theme Switcher & PWA Install Button -->
+            <div class="top-toolbar">
+                <button class="event-pill active" data-theme="auto" onclick="setTheme('auto', this)">✨ Auto</button>
+                <button class="event-pill" data-theme="christmas" onclick="setTheme('christmas', this)">🎄 Christmas</button>
+                <button class="event-pill" data-theme="newyear" onclick="setTheme('newyear', this)">🎆 New Year</button>
+                <button class="event-pill" data-theme="thingyan" onclick="setTheme('thingyan', this)">💧 Thingyan</button>
+                <button class="event-pill" data-theme="default" onclick="setTheme('default', this)">🧡 Classic</button>
+                <button id="install-btn" class="install-btn" onclick="installApp()">📲 Install App</button>
+            </div>
+
+            <!-- Dynamic Event Banner -->
+            <div id="event-banner" class="event-banner">
+                🧡 Welcome to Min Print & Copy - Fast & Quality Print Service 🖨️
+            </div>
+
             <div class="profile">
                 <div class="profile-img">
                     <img src="443.png" alt="Min Print & Copy Logo">
                 </div>
-                
+
                 <h1>MIN PRINT & COPY</h1>
 
                 <div class="marquee-bar">
-                    <div class="marquee-content">
+                    <div class="marquee-content" id="marquee-text">
                         🧡 Welcome to Min Print & Copy🖨️: 🎉"Dear Valued Customers, you can send the photos and files you wish to print through the links shown below."🎉 Thank you so much for choosing us!🧡
                     </div>
                 </div>
-                
+
                 <p class="description">
                     ချစ်ခင်ရပါသော Customer များခင်ဗျာ၊<br>
                     လူကြီးမင်းတို့ ပေးပို့လိုသည့် ပုံများ၊ ဖိုင်များကို<br>
@@ -329,35 +458,35 @@
 
             <div class="contact-grid">
                 <!-- Telegram -->
-                <a href="https://t.me/minhtetthar428" class="contact-card" target="_blank">
+                <a href="https://t.me/minhtetthar428" class="contact-card" target="_blank" rel="noopener noreferrer">
                     <svg class="icon icon-telegram" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
                     <span class="card-title">Telegram</span>
                     <span class="card-sub">@minhtetthar428</span>
                 </a>
 
                 <!-- Viber -->
-                <a href="https://msng.link/o/?959964563388=vi" class="contact-card" target="_blank">
+                <a href="https://msng.link/o/?959964563388=vi" class="contact-card" target="_blank" rel="noopener noreferrer">
                     <svg class="icon icon-viber" viewBox="0 0 24 24"><path d="M19.38 4.62C17.43 2.67 14.83 1.5 12 1.5S6.57 2.67 4.62 4.62C2.67 6.57 1.5 9.17 1.5 12s1.17 5.43 3.12 7.38c1.86 1.86 4.31 2.98 6.94 3.11h.88c.84-.04 1.67-.18 2.47-.43.34-.11.53-.47.42-.81-.11-.34-.47-.53-.81-.42-.69.22-1.4.34-2.13.38h-.76c-2.27-.11-4.38-1.08-5.99-2.69C3.96 16.84 3 14.53 3 12s.96-4.84 2.69-6.57C7.39 3.7 9.61 2.75 12 2.75s4.61.95 6.31 2.68c1.7 1.7 2.69 3.96 2.69 6.57 0 1.82-.53 3.58-1.53 5.08-.2.3-.11.71.19.91.3.2.71.11.91-.19 1.16-1.74 1.78-3.79 1.78-5.8 0-2.83-1.17-5.43-3.12-7.38z"/><path d="M12 6c-3.31 0-6 2.69-6 6 0 .55.45 1 1 1s1-.45 1-1c0-2.21 1.79-4 4-4 .55 0 1-.45 1-1s-.45-1-1-1zm3.8 2.2c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41 1.56 1.56 1.56 4.09 0 5.65-.39.39-.39 1.02 0 1.41.2.2.45.29.71.29s.51-.1.71-.29c2.34-2.34 2.34-6.14 0-8.47z"/></svg>
                     <span class="card-title">Viber</span>
                     <span class="card-sub">(Need VPN)</span>
                 </a>
 
                 <!-- Messenger -->
-                <a href="https://m.me/min.htet.thar.886065" class="contact-card" target="_blank">
+                <a href="https://m.me/min.htet.thar.886065" class="contact-card" target="_blank" rel="noopener noreferrer">
                     <svg class="icon icon-messenger" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.455 5.51 3.733 7.182V22l3.418-1.875c.917.254 1.892.393 2.849.393 5.523 0 10-4.145 10-9.26C22 6.145 17.523 2 12 2zm1.092 12.443l-2.548-2.718-4.972 2.718 5.468-5.805 2.611 2.718 4.909-2.718-5.468 5.805z"/></svg>
                     <span class="card-title">Messenger</span>
                     <span class="card-sub">(Need VPN)</span>
                 </a>
 
                 <!-- Instagram -->
-                <a href="https://www.instagram.com/minhtetthar428" class="contact-card" target="_blank">
+                <a href="https://www.instagram.com/minhtetthar428" class="contact-card" target="_blank" rel="noopener noreferrer">
                     <svg class="icon icon-instagram" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                     <span class="card-title">Instagram</span>
                     <span class="card-sub">(Need VPN)</span>
                 </a>
 
                 <!-- TikTok -->
-                <a href="https://www.tiktok.com/@min.printcopy?_r=1&_t=ZS-95yP5V6BgMn" class="contact-card" target="_blank">
+                <a href="https://www.tiktok.com/@min.printcopy?_r=1&_t=ZS-95yP5V6BgMn" class="contact-card" target="_blank" rel="noopener noreferrer">
                     <svg class="icon icon-tiktok" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64c.29 0 .56.04.82.12V9.4a6.27 6.27 0 00-1-.08 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.05a8.16 8.16 0 004.97 1.64V7.24a4.84 4.84 0 01-1.01-.55z"/></svg>
                     <span class="card-title">TikTok</span>
                     <span class="card-sub">@min.printcopy</span>
@@ -380,6 +509,10 @@
                 </a>
             </div>
 
+            <div class="ios-tip">
+                💡 iPhone တွင် App အဖြစ် ထည့်သွင်းရန်: Safari မှ <b>Share</b> ခလုတ်ကို နှိပ်ပြီး <b>"Add to Home Screen"</b> ကို ရွေးပါ။
+            </div>
+
             <div class="footer-note">
                 <div class="address-text">
                     မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်
@@ -389,57 +522,193 @@
         </div>
     </div>
 
-    <!-- Script: သီချင်းဖွင့်ခြင်း၊ ထိန်းချုပ်ခြင်းနှင့် Screen ဖျောက်ရန် -->
     <script>
+        /* 1. Music Control */
         const music = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
         const musicText = document.getElementById('music-text');
 
-        // သီချင်း ဖွင့်/ပိတ် ပြုလုပ်ရန် Function
-        function toggleMusic() {
-            if (music.paused) {
-                music.play().then(() => {
-                    musicText.innerText = "Music Pause";
-                    musicBtn.style.background = "#e67e22";
-                    musicBtn.style.color = "#ffffff";
-                }).catch(e => {
-                    console.log("Play blocked");
-                });
+        function updateMusicUI(isPlaying) {
+            if (isPlaying) {
+                musicText.innerText = "Music Pause";
+                musicBtn.style.background = "#111827";
+                musicBtn.style.color = "#ffffff";
             } else {
-                music.pause();
                 musicText.innerText = "Music Play";
                 musicBtn.style.background = "#ffffff";
-                musicBtn.style.color = "#e67e22";
+                musicBtn.style.color = "var(--accent-color)";
             }
         }
 
-        // App စဖွင့်ချိန် လုပ်ဆောင်ချက်များ
+        function toggleMusic() {
+            if (music.paused) {
+                music.play().then(() => updateMusicUI(true)).catch(() => {});
+            } else {
+                music.pause();
+                updateMusicUI(false);
+            }
+        }
+
+        /* 2. Dynamic Event Theme & Animated Canvas */
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let activeMode = 'default';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const EVENT_CONFIG = {
+            christmas: {
+                bodyClass: 'theme-christmas',
+                banner: '🎄 Merry Christmas! ခရစ္စမတ်ပွဲတော်အတွက် ပုံများ၊ ဖိုင်များကို ယခုပဲ ပေးပို့နိုင်ပါပြီ 🎁',
+                splashSub: '🎄 Merry Christmas & Happy Holidays 🎄',
+                marquee: '🎄 Merry Christmas from Min Print & Copy! 🎅 Send your holiday photos, cards & print files easily through our links below! 🎁'
+            },
+            newyear: {
+                bodyClass: 'theme-newyear',
+                banner: '🎆 Happy New Year! နှစ်သစ်မှာ လုပ်ငန်းများ အောင်မြင်ပျော်ရွှင်ပါစေခင်ဗျာ ✨',
+                splashSub: '🎆 Happy New Year! နှစ်သစ်မင်္ဂလာပါ 🎆',
+                marquee: '🎆 Happy New Year from Min Print & Copy! ✨ Wishing you a bright, prosperous new year ahead! 🎉'
+            },
+            thingyan: {
+                bodyClass: 'theme-thingyan',
+                banner: '💧 မဟာသင်္ကြန် အတာရေနှင့်အတူ စိတ်၏ချမ်းသာခြင်း ကိုယ်၏ကျန်းမာခြင်း ပြည့်စုံပါစေ 🌸',
+                splashSub: '💧 မင်္ဂလာရှိသော သင်္ကြန်အချိန်အခါဖြစ်ပါစေ 💧',
+                marquee: '💧 Happy Thingyan Festival from Min Print & Copy! 🌸 Stay cool, safe & happy! 💧'
+            },
+            default: {
+                bodyClass: '',
+                banner: '🧡 Welcome to Min Print & Copy - Fast & Quality Print Service 🖨️',
+                splashSub: '🧡သာယာသောနေ့လေးတစ်နေ့ဖြစ်ပါစေခင်ဗျာ🧡',
+                marquee: '🧡 Welcome to Min Print & Copy🖨️: 🎉"Dear Valued Customers, you can send the photos and files you wish to print through the links shown below."🎉 Thank you so much for choosing us!🧡'
+            }
+        };
+
+        function detectAutoEvent() {
+            const now = new Date();
+            const m = now.getMonth() + 1; // 1-12
+            const d = now.getDate();
+            if (m === 12 && d >= 20) return 'christmas';
+            if (m === 1 && d <= 10) return 'newyear';
+            if (m === 4 && d >= 10 && d <= 20) return 'thingyan';
+            return 'default';
+        }
+
+        function initParticles(mode) {
+            particles = [];
+            const count = mode === 'newyear' ? 45 : 35;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: mode === 'christmas' ? (Math.random() * 3.5 + 1.5) : (Math.random() * 2.5 + 1),
+                    vx: (Math.random() - 0.5) * 1.2,
+                    vy: mode === 'newyear' ? -(Math.random() * 1.8 + 0.6) : (Math.random() * 1.4 + 0.6),
+                    alpha: Math.random() * 0.7 + 0.25,
+                    color: mode === 'newyear'
+                        ? ['#fde047', '#f97316', '#38bdf8', '#f472b6'][i % 4]
+                        : '#ffffff'
+                });
+            }
+        }
+
+        function animateFX() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const p of particles) {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.y > canvas.height + 10) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.y < -10) {
+                    p.y = canvas.height + 10;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x > canvas.width + 10) p.x = -10;
+                if (p.x < -10) p.x = canvas.width + 10;
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            requestAnimationFrame(animateFX);
+        }
+
+        function applyEvent(mode) {
+            activeMode = mode;
+            const cfg = EVENT_CONFIG[mode] || EVENT_CONFIG.default;
+            document.body.className = cfg.bodyClass;
+            document.getElementById('event-banner').innerHTML = cfg.banner;
+            document.getElementById('splash-event-sub').innerHTML = cfg.splashSub;
+            document.getElementById('marquee-text').innerHTML = cfg.marquee;
+            initParticles(mode);
+        }
+
+        function setTheme(selected, btnEl) {
+            document.querySelectorAll('.event-pill').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            const targetMode = selected === 'auto' ? detectAutoEvent() : selected;
+            applyEvent(targetMode);
+        }
+
+        /* 3. PWA Install Prompt */
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.add('show');
+        });
+
+        async function installApp() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.classList.remove('show');
+        }
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.remove('show');
+        });
+
+        /* 4. Page Load & Splash */
         window.addEventListener('load', () => {
-            // အလိုအလျောက် သီချင်းစတင်ရန် ကြိုးစားခြင်း
+            applyEvent(detectAutoEvent());
+            animateFX();
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            }
+
             music.play().then(() => {
-                musicText.innerText = "Music Pause";
-                musicBtn.style.background = "#e67e22";
-                musicBtn.style.color = "#ffffff";
-            }).catch(error => {
-                // ဘရောင်ဇာက ပိတ်ပင်ထားပါက မျက်နှာပြင်ပေါ်သို့ တစ်ချက်တို့ထိလိုက်သည်နှင့် ဖွင့်ပေးရန်
+                updateMusicUI(true);
+            }).catch(() => {
                 document.body.addEventListener('click', () => {
                     if (music.paused) {
-                        music.play();
-                        musicText.innerText = "Music Pause";
-                        musicBtn.style.background = "#e67e22";
-                        musicBtn.style.color = "#ffffff";
+                        music.play().then(() => updateMusicUI(true)).catch(() => {});
                     }
                 }, { once: true });
             });
 
-            // ၃ စက္ကန့်အကြာတွင် Logo Screen ကို ပျောက်သွားစေရန်
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 splash.style.opacity = '0';
                 splash.style.visibility = 'hidden';
-            }, 2500); 
+            }, 2400);
         });
     </script>
-
 </body>
 </html>

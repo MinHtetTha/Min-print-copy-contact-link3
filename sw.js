@@ -1,9 +1,9 @@
-const CACHE_NAME = 'min-print-copy-v1';
+const CACHE_NAME = 'min-print-copy-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './443.png',
+  './442.png',
   './hard_copy_rush.mp3'
 ];
 

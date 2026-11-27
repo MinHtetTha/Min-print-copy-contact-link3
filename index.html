@@ -109,6 +109,12 @@
             transition: opacity 0.6s ease, visibility 0.6s ease;
         }
 
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
         .splash-logo-box {
             width: 148px;
             height: 148px;
@@ -181,6 +187,7 @@
             cursor: pointer;
             user-select: none;
             background: #ffffff;
+            transition: opacity 0.25s ease;
         }
 
         .story-skip-btn {
@@ -708,14 +715,14 @@
     <div id="toast" class="toast">Copied</div>
     <canvas id="fx-canvas"></canvas>
 
-    <!-- Story / Full-Screen Ad Modal (White Backdrop, 5s Countdown, Instant Skip) -->
+    <!-- Story / Full-Screen Ad Modal (Auto-rotating 3 Posters until Skip) -->
     <div id="story-ad-modal" class="story-ad-backdrop">
         <div class="story-ad-box">
             <button id="story-skip-btn" class="story-skip-btn" onclick="closeStoryAd()">
-                ကျော်မည် <span id="story-timer">5s</span>
+                ကျော်မည် <span id="story-timer">3s</span>
             </button>
 
-            <img id="story-ad-img" src="poster1.jpg" alt="Min Print & Copy Poster" class="story-ad-img" onclick="nextStorySlide()">
+            <img id="story-ad-img" src="poster1.jpg" alt="Min Print & Copy Poster" class="story-ad-img" onclick="nextStorySlide(true)">
 
             <div class="story-dots" id="story-dots"></div>
         </div>
@@ -928,102 +935,158 @@
             showToast(label);
         }
 
-        /* Story / Full-Screen Ad (White Backdrop, 5s Countdown, Instant Skip) */
-        const STORY_IMAGES = [
+        /* Poster Auto-Carousel (Loops continuously until Skip is clicked) */
+        const STORY_SLIDES = [
             'poster1.jpg',
             'poster2.jpg',
             'poster3.jpg'
         ];
+        const SLIDE_INTERVAL_MS = 2500; // 2.5 seconds per poster
 
-        let storyIndex = 0;
-        let skipInterval;
+        let currentSlide = 0;
+        let slideRotateTimer = null;
+        let skipBadgeTimer = null;
+        let skipSecondsLeft = 3;
 
         function renderStoryDots() {
             const dotsWrap = document.getElementById('story-dots');
             dotsWrap.innerHTML = '';
-            if (STORY_IMAGES.length <= 1) return;
-
-            STORY_IMAGES.forEach((_, idx) => {
+            STORY_SLIDES.forEach((_, idx) => {
                 const dot = document.createElement('button');
-                dot.className = 'story-dot' + (idx === storyIndex ? ' active' : '');
+                dot.type = 'button';
+                dot.className = 'story-dot' + (idx === currentSlide ? ' active' : '');
                 dot.setAttribute('aria-label', `Poster ${idx + 1}`);
                 dot.onclick = (e) => {
                     e.stopPropagation();
-                    showStorySlide(idx);
+                    goToStorySlide(idx, true);
                 };
                 dotsWrap.appendChild(dot);
             });
         }
 
-        function showStorySlide(idx) {
-            storyIndex = (idx + STORY_IMAGES.length) % STORY_IMAGES.length;
-            document.getElementById('story-ad-img').src = STORY_IMAGES[storyIndex];
+        function goToStorySlide(index, resetTimer = false) {
+            const imgEl = document.getElementById('story-ad-img');
+            currentSlide = ((index % STORY_SLIDES.length) + STORY_SLIDES.length) % STORY_SLIDES.length;
+
+            imgEl.style.opacity = '0.35';
+            imgEl.src = STORY_SLIDES[currentSlide];
+            imgEl.onload = () => {
+                imgEl.style.opacity = '1';
+            };
+            // Fallback in case image is already cached or fails to load
+            setTimeout(() => {
+                imgEl.style.opacity = '1';
+            }, 180);
+
             renderStoryDots();
+
+            if (resetTimer) {
+                startAutoSlideLoop();
+            }
         }
 
-        function nextStorySlide() {
-            if (STORY_IMAGES.length > 1) {
-                showStorySlide(storyIndex + 1);
-            }
+        function nextStorySlide(resetTimer = false) {
+            goToStorySlide(currentSlide + 1, resetTimer);
+        }
+
+        function startAutoSlideLoop() {
+            clearInterval(slideRotateTimer);
+            slideRotateTimer = setInterval(() => {
+                nextStorySlide(false);
+            }, SLIDE_INTERVAL_MS);
         }
 
         function openStoryAd() {
             const modal = document.getElementById('story-ad-modal');
-            const skipBtn = document.getElementById('story-skip-btn');
+            const timerEl = document.getElementById('story-timer');
+            currentSlide = 0;
+            skipSecondsLeft = 3;
+            timerEl.innerText = `${skipSecondsLeft}s`;
 
-            storyIndex = 0;
-            showStorySlide(0);
+            goToStorySlide(0, false);
             modal.classList.add('open');
 
-            let left = 5;
-            skipBtn.innerHTML = `ကျော်မည် <span id="story-timer">${left}s</span>`;
+            startAutoSlideLoop();
 
-            clearInterval(skipInterval);
-            skipInterval = setInterval(() => {
-                left -= 1;
-                if (left > 0) {
-                    const t = document.getElementById('story-timer');
-                    if (t) t.innerText = `${left}s`;
-                } else {
-                    clearInterval(skipInterval);
-                    skipBtn.innerHTML = 'ကျော်မည်';
+            clearInterval(skipBadgeTimer);
+            skipBadgeTimer = setInterval(() => {
+                skipSecondsLeft = Math.max(0, skipSecondsLeft - 1);
+                timerEl.innerText = `${skipSecondsLeft}s`;
+                if (skipSecondsLeft === 0) {
+                    clearInterval(skipBadgeTimer);
                 }
             }, 1000);
         }
 
         function closeStoryAd() {
-            clearInterval(skipInterval);
+            clearInterval(slideRotateTimer);
+            clearInterval(skipBadgeTimer);
             document.getElementById('story-ad-modal').classList.remove('open');
         }
 
-        /* Live Open/Closed Status (8:00 AM - 8:00 PM) */
-        function updateShopStatus() {
+        /* Splash Screen -> Auto Poster Rotation */
+        window.addEventListener('DOMContentLoaded', () => {
+            updateOpenStatus();
+            setTheme('auto');
+
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('hidden');
+                openStoryAd();
+            }, 1200);
+        });
+
+        /* Open / Closed Status (8:00 AM - 8:00 PM) */
+        function updateOpenStatus() {
             const now = new Date();
             const hour = now.getHours();
             const isOpen = hour >= 8 && hour < 20;
             const dot = document.getElementById('status-dot');
             const label = document.getElementById('status-label');
+
             if (isOpen) {
                 dot.classList.remove('closed');
                 label.innerText = 'Open Now · 8:00 AM – 8:00 PM';
             } else {
                 dot.classList.add('closed');
-                label.innerText = 'Closed · Opens 8:00 AM';
+                label.innerText = 'Closed Now · Opens 8:00 AM';
             }
         }
 
-        /* Save Contact (.vcf) */
+        /* Event Themes */
+        function setTheme(themeName, btnEl) {
+            const body = document.body;
+            body.classList.remove('theme-christmas', 'theme-newyear', 'theme-thingyan', 'theme-promo');
+
+            let resolvedTheme = themeName;
+            if (themeName === 'auto') {
+                const month = new Date().getMonth() + 1;
+                if (month === 12) resolvedTheme = 'christmas';
+                else if (month === 1) resolvedTheme = 'newyear';
+                else if (month === 4) resolvedTheme = 'thingyan';
+                else resolvedTheme = 'default';
+            }
+
+            if (resolvedTheme !== 'default') {
+                body.classList.add(`theme-${resolvedTheme}`);
+            }
+
+            if (btnEl) {
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            }
+        }
+
+        /* vCard Download */
         function downloadVCard() {
             const vcard = [
                 'BEGIN:VCARD',
                 'VERSION:3.0',
-                'N:Copy;Min Print &;;;',
                 'FN:Min Print & Copy',
                 'ORG:Min Print & Copy',
-                'TEL;TYPE=CELL,VOICE:+959964563388',
+                'TEL;TYPE=CELL:+959964563388',
                 'EMAIL:paannpyoelaat428@gmail.com',
                 'ADR;TYPE=WORK:;;မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်;Yangon;;;Myanmar',
-                'URL:https://www.google.com/maps?q=16.854132287069156,96.12929656028936',
                 'END:VCARD'
             ].join('\n');
 
@@ -1036,148 +1099,44 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('Contact ဖိုင် Download ပြုလုပ်ပြီးပါပြီ');
+            showToast('Contact ဖိုင် ဒေါင်းလုဒ်လုပ်ပြီးပါပြီ');
         }
 
-        /* QR Code Modal */
+        /* QR Modal */
         function openQRModal() {
+            const qrImg = document.getElementById('qr-image');
             const targetUrl = encodeURIComponent(window.location.href);
-            document.getElementById('qr-image').src =
-                `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${targetUrl}`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${targetUrl}`;
             document.getElementById('qr-modal').classList.add('open');
         }
 
-        function closeQRModal(e) {
-            if (!e || e.target.id === 'qr-modal') {
+        function closeQRModal(event) {
+            if (!event || event.target === document.getElementById('qr-modal')) {
                 document.getElementById('qr-modal').classList.remove('open');
             }
         }
 
-        /* Share */
-        async function shareCard() {
-            const data = {
+        /* Web Share */
+        function shareCard() {
+            const shareData = {
                 title: 'Min Print & Copy',
-                text: 'Min Print & Copy — Contact & Print Service',
+                text: 'Min Print & Copy — Photo · Document · Copy · Finishing',
                 url: window.location.href
             };
+
             if (navigator.share) {
-                try { await navigator.share(data); } catch (_) {}
+                navigator.share(shareData).catch(() => {});
             } else {
                 copyText(window.location.href, 'Link Copy ကူးပြီးပါပြီ');
             }
         }
 
-        /* Event Themes & Canvas */
-        const canvas = document.getElementById('fx-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        const EVENT_CONFIG = {
-            christmas: {
-                bodyClass: 'theme-christmas',
-                splashSub: 'Merry Christmas & Happy Holidays',
-                marquee: 'Merry Christmas from Min Print & Copy — ခရစ္စမတ်ပွဲတော်အတွက် ပုံများနှင့် ဖိုင်များကို ယခုပဲ ပေးပို့နိုင်ပါပြီ။'
-            },
-            newyear: {
-                bodyClass: 'theme-newyear',
-                splashSub: 'Happy New Year · နှစ်သစ်မင်္ဂလာပါ',
-                marquee: 'Happy New Year from Min Print & Copy — နှစ်သစ်မှာ လုပ်ငန်းများ အောင်မြင်ပျော်ရွှင်ပါစေခင်ဗျာ။'
-            },
-            thingyan: {
-                bodyClass: 'theme-thingyan',
-                splashSub: 'မင်္ဂလာရှိသော သင်္ကြန်အချိန်အခါဖြစ်ပါစေ',
-                marquee: 'Happy Thingyan from Min Print & Copy — အတာရေနှင့်အတူ စိတ်၏ချမ်းသာခြင်း ကိုယ်၏ကျန်းမာခြင်း ပြည့်စုံပါစေ။'
-            },
-            promo: {
-                bodyClass: 'theme-promo',
-                splashSub: 'Min Print & Copy Service Notice',
-                marquee: 'Min Print & Copy — Photo Print, Document Print & Copy ဝန်ဆောင်မှုများအတွက် အောက်ပါ Links များမှ ဆက်သွယ်နိုင်ပါပြီ။'
-            },
-            default: {
-                bodyClass: '',
-                splashSub: 'သာယာသောနေ့လေးတစ်နေ့ဖြစ်ပါစေခင်ဗျာ',
-                marquee: 'Min Print & Copy — ပုံများနှင့် ပရင့်ထုတ်လိုသော ဖိုင်များကို အောက်ပါ Links များမှတစ်ဆင့် အလွယ်တကူ ပေးပို့နိုင်ပါပြီ။'
-            }
-        };
-
-        function detectAutoEvent() {
-            const now = new Date();
-            const m = now.getMonth() + 1;
-            const d = now.getDate();
-            if (m === 12 && d >= 20) return 'christmas';
-            if (m === 1 && d <= 10) return 'newyear';
-            if (m === 4 && d >= 10 && d <= 20) return 'thingyan';
-            return 'default';
-        }
-
-        function initParticles(mode) {
-            particles = [];
-            const total = (mode === 'newyear' || mode === 'promo') ? 32 : 20;
-            for (let i = 0; i < total; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    r: mode === 'christmas' ? (Math.random() * 2.8 + 1.4) : (Math.random() * 2 + 1),
-                    vx: (Math.random() - 0.5) * 0.8,
-                    vy: mode === 'newyear' ? -(Math.random() * 1.2 + 0.5) : (Math.random() * 1 + 0.45),
-                    alpha: Math.random() * 0.45 + 0.18,
-                    color: (mode === 'newyear' || mode === 'promo')
-                        ? ['#fde047', '#fb7185', '#38bdf8', '#fb923c'][i % 4]
-                        : '#ffffff'
-                });
-            }
-        }
-
-        function animateFX() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (const p of particles) {
-                p.x += p.vx;
-                p.y += p.vy;
-                if (p.y > canvas.height + 8) { p.y = -8; p.x = Math.random() * canvas.width; }
-                if (p.y < -8) { p.y = canvas.height + 8; p.x = Math.random() * canvas.width; }
-                if (p.x > canvas.width + 8) p.x = -8;
-                if (p.x < -8) p.x = canvas.width + 8;
-
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-            requestAnimationFrame(animateFX);
-        }
-
-        function applyEvent(mode) {
-            const cfg = EVENT_CONFIG[mode] || EVENT_CONFIG.default;
-            document.body.className = cfg.bodyClass;
-            document.getElementById('splash-sub').innerText = cfg.splashSub;
-            document.getElementById('marquee-text').innerText = cfg.marquee;
-            initParticles(mode);
-        }
-
-        function setTheme(selected, btn) {
-            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            applyEvent(selected === 'auto' ? detectAutoEvent() : selected);
-        }
-
-        /* PWA Install */
-        let deferredPrompt;
-        const installBtn = document.getElementById('install-btn');
-
+        /* PWA Install Prompt */
+        let deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.classList.add('show');
+            document.getElementById('install-btn').classList.add('show');
         });
 
         async function installApp() {
@@ -1185,30 +1144,8 @@
             deferredPrompt.prompt();
             await deferredPrompt.userChoice;
             deferredPrompt = null;
-            installBtn.classList.remove('show');
+            document.getElementById('install-btn').classList.remove('show');
         }
-
-        window.addEventListener('appinstalled', () => {
-            installBtn.classList.remove('show');
-        });
-
-        /* Init */
-        window.addEventListener('load', () => {
-            updateShopStatus();
-            applyEvent(detectAutoEvent());
-            animateFX();
-
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(() => {});
-            }
-
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-                openStoryAd();
-            }, 2100);
-        });
     </script>
 </body>
 </html>

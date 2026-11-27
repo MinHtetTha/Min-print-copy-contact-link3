@@ -1,4 +1,4 @@
-const CACHE_NAME = 'min-print-copy-v13';
+const CACHE_NAME = 'min-print-copy-v14';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -142,13 +142,12 @@
             font-weight: 500;
         }
 
-        /* Story / Full-Screen Ad Modal */
+        /* Story / Full-Screen Ad Modal (White Backdrop) */
         .story-ad-backdrop {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.92);
-            backdrop-filter: blur(8px);
+            background: #ffffff;
             z-index: 10005;
             align-items: center;
             justify-content: center;
@@ -167,8 +166,9 @@
             max-height: 760px;
             border-radius: 22px;
             overflow: hidden;
-            background: #1e293b;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            background: #ffffff;
+            box-shadow: 0 18px 44px rgba(15, 23, 42, 0.16);
+            border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -180,6 +180,7 @@
             object-fit: contain;
             cursor: pointer;
             user-select: none;
+            background: #ffffff;
         }
 
         .story-skip-btn {
@@ -187,22 +188,18 @@
             top: 14px;
             right: 14px;
             z-index: 2;
-            background: rgba(15, 23, 42, 0.75);
+            background: #0f172a;
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.28);
+            border: 1px solid rgba(15, 23, 42, 0.2);
             border-radius: 999px;
-            padding: 6px 12px;
+            padding: 6px 13px;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .story-skip-btn:not(:disabled) {
-            background: #ffffff;
-            color: #0f172a;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
         }
 
         .story-dots {
@@ -219,40 +216,15 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(15, 23, 42, 0.25);
             border: none;
             cursor: pointer;
             padding: 0;
         }
 
         .story-dot.active {
-            background: #ffffff;
+            background: #0f172a;
             transform: scale(1.2);
-        }
-
-        /* Floating Music Button */
-        .music-control {
-            position: fixed;
-            bottom: 18px;
-            right: 18px;
-            background: #ffffff;
-            color: var(--ink);
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-size: 12.5px;
-            font-weight: 700;
-            cursor: pointer;
-            z-index: 1000;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
-        }
-
-        .music-control:hover {
-            transform: translateY(-2px);
         }
 
         /* Main Container */
@@ -261,7 +233,7 @@
             z-index: 2;
             display: flex;
             justify-content: center;
-            padding: 26px 16px 92px;
+            padding: 26px 16px 48px;
         }
 
         .container {
@@ -450,30 +422,6 @@
             font-weight: 500;
         }
 
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .service-item {
-            background: rgba(255, 255, 255, 0.13);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 12px;
-            padding: 10px 11px;
-        }
-
-        .service-title {
-            font-size: 12.5px;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .service-desc {
-            font-size: 11px;
-            opacity: 0.85;
-        }
-
         /* Contact Cards */
         .contact-grid {
             display: grid;
@@ -564,7 +512,7 @@
             font-weight: 600;
         }
 
-        /* Info & Payment Card */
+        /* Location Card */
         .info-card {
             background: var(--card);
             color: var(--ink);
@@ -587,44 +535,6 @@
             margin-bottom: 12px;
             font-weight: 600;
         }
-
-        .payment-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .pay-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #f8fafc;
-            border: 1px solid var(--line);
-            color: var(--ink);
-            font-size: 11.5px;
-            font-weight: 700;
-            padding: 6px 10px;
-            border-radius: 10px;
-        }
-
-        .pay-badge-icon {
-            width: 18px;
-            height: 18px;
-            border-radius: 5px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            font-weight: 900;
-            color: #ffffff;
-            flex-shrink: 0;
-        }
-
-        .kbz-bg { background: #0055a5; }
-        .wave-bg { background: #eab308; color: #0f172a; }
-        .aya-bg { background: #dc2626; }
-        .cash-bg { background: #16a34a; }
 
         .action-row {
             display: flex;
@@ -798,11 +708,11 @@
     <div id="toast" class="toast">Copied</div>
     <canvas id="fx-canvas"></canvas>
 
-    <!-- Story / Full-Screen Ad Modal (3 Posters) -->
+    <!-- Story / Full-Screen Ad Modal (White Backdrop, 5s Countdown, Instant Skip) -->
     <div id="story-ad-modal" class="story-ad-backdrop">
         <div class="story-ad-box">
-            <button id="story-skip-btn" class="story-skip-btn" onclick="closeStoryAd()" disabled>
-                ကျော်မည် <span id="story-timer">3s</span>
+            <button id="story-skip-btn" class="story-skip-btn" onclick="closeStoryAd()">
+                ကျော်မည် <span id="story-timer">5s</span>
             </button>
 
             <img id="story-ad-img" src="poster1.jpg" alt="Min Print & Copy Poster" class="story-ad-img" onclick="nextStorySlide()">
@@ -810,15 +720,6 @@
             <div class="story-dots" id="story-dots"></div>
         </div>
     </div>
-
-    <!-- Background Music -->
-    <audio id="bg-music" loop preload="auto">
-        <source src="high_noon_parade.mp3" type="audio/mpeg">
-    </audio>
-
-    <button id="music-btn" class="music-control" onclick="toggleMusic()">
-        <span id="music-text">Music Play</span>
-    </button>
 
     <!-- Splash Screen -->
     <div id="splash-screen">
@@ -853,7 +754,7 @@
                 <div class="brand-tagline">Photo · Document · Copy · Finishing</div>
             </div>
 
-            <!-- Quick Utility Row (Share moved here in place of Copy GPS) -->
+            <!-- Quick Utility Row -->
             <div class="utility-row">
                 <button class="utility-btn" onclick="downloadVCard()">Save Contact</button>
                 <button class="utility-btn" onclick="openQRModal()">QR Code</button>
@@ -874,29 +775,6 @@
                     လူကြီးမင်းတို့ ပေးပို့လိုသည့် ပုံများ၊ ဖိုင်များကို<br>
                     အောက်ဖော်ပြပါ Links များမှတစ်ဆင့်<br>
                     ပေးပို့နိုင်ပါတယ်ခင်ဗျာ။
-                </div>
-            </div>
-
-            <!-- Services -->
-            <div class="glass-section">
-                <div class="section-head">Services Offered</div>
-                <div class="services-grid">
-                    <div class="service-item">
-                        <div class="service-title">Photo Printing</div>
-                        <div class="service-desc">Passport · ID · 4R · 5R · A4</div>
-                    </div>
-                    <div class="service-item">
-                        <div class="service-title">Print &amp; Copy</div>
-                        <div class="service-desc">Color &amp; B&amp;W Documents</div>
-                    </div>
-                    <div class="service-item">
-                        <div class="service-title">Laminating</div>
-                        <div class="service-desc">ID Card · Certificate · A4</div>
-                    </div>
-                    <div class="service-item">
-                        <div class="service-title">Binding &amp; Filing</div>
-                        <div class="service-desc">Reports · Notes · Files</div>
-                    </div>
                 </div>
             </div>
 
@@ -950,31 +828,12 @@
                 </div>
             </div>
 
-            <!-- Location & Payment Card -->
+            <!-- Location Card -->
             <div class="info-card">
-                <div class="info-title">Location &amp; Payment</div>
+                <div class="info-title">Location</div>
                 <div class="info-line">
                     မေခဆောင်(1B)၊ သမိုင်းကောလိပ်လမ်း၊ လှိုင်မြို့နယ်<br>
                     Hours: Daily 8:00 AM – 8:00 PM
-                </div>
-
-                <div class="payment-grid">
-                    <span class="pay-chip">
-                        <span class="pay-badge-icon kbz-bg">KBZ</span>
-                        <span>KBZPay</span>
-                    </span>
-                    <span class="pay-chip">
-                        <span class="pay-badge-icon wave-bg">W</span>
-                        <span>WavePay</span>
-                    </span>
-                    <span class="pay-chip">
-                        <span class="pay-badge-icon aya-bg">AYA</span>
-                        <span>AYA Pay</span>
-                    </span>
-                    <span class="pay-chip">
-                        <span class="pay-badge-icon cash-bg">MMK</span>
-                        <span>Cash</span>
-                    </span>
                 </div>
 
                 <div class="action-row">
@@ -1069,7 +928,7 @@
             showToast(label);
         }
 
-        /* Story / Full-Screen Ad (3 Portrait Posters) */
+        /* Story / Full-Screen Ad (White Backdrop, 5s Countdown, Instant Skip) */
         const STORY_IMAGES = [
             'poster1.jpg',
             'poster2.jpg',
@@ -1116,8 +975,7 @@
             showStorySlide(0);
             modal.classList.add('open');
 
-            let left = 3;
-            skipBtn.disabled = true;
+            let left = 5;
             skipBtn.innerHTML = `ကျော်မည် <span id="story-timer">${left}s</span>`;
 
             clearInterval(skipInterval);
@@ -1128,7 +986,6 @@
                     if (t) t.innerText = `${left}s`;
                 } else {
                     clearInterval(skipInterval);
-                    skipBtn.disabled = false;
                     skipBtn.innerHTML = 'ကျော်မည်';
                 }
             }, 1000);
@@ -1207,32 +1064,6 @@
                 try { await navigator.share(data); } catch (_) {}
             } else {
                 copyText(window.location.href, 'Link Copy ကူးပြီးပါပြီ');
-            }
-        }
-
-        /* Music Control */
-        const music = document.getElementById('bg-music');
-        const musicBtn = document.getElementById('music-btn');
-        const musicText = document.getElementById('music-text');
-
-        function updateMusicUI(playing) {
-            if (playing) {
-                musicText.innerText = 'Music Pause';
-                musicBtn.style.background = '#0f172a';
-                musicBtn.style.color = '#ffffff';
-            } else {
-                musicText.innerText = 'Music Play';
-                musicBtn.style.background = '#ffffff';
-                musicBtn.style.color = '#0f172a';
-            }
-        }
-
-        function toggleMusic() {
-            if (music.paused) {
-                music.play().then(() => updateMusicUI(true)).catch(() => {});
-            } else {
-                music.pause();
-                updateMusicUI(false);
             }
         }
 
@@ -1370,16 +1201,6 @@
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').catch(() => {});
             }
-
-            music.play().then(() => {
-                updateMusicUI(true);
-            }).catch(() => {
-                document.body.addEventListener('click', () => {
-                    if (music.paused) {
-                        music.play().then(() => updateMusicUI(true)).catch(() => {});
-                    }
-                }, { once: true });
-            });
 
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
